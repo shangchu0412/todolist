@@ -364,7 +364,6 @@ function Todo() {
                   Swal.fire({
                     title: "欄位不可空白",
                     icon: 'error',
-                    text: error,
                     confirmButtonText: "OK",
                   })
               }}>
