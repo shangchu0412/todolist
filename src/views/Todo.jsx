@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 import empty from '../assets/empty.png'
-import rhefZ3 from '../assets/rhefZ3.png';
 
 
 
@@ -12,8 +11,8 @@ const { VITE_APP_HOST } = import.meta.env
 //當待辦事項空白時
 const Empty = () => {
   return (
-    <div className="text-center py-60">
-      <p className="mb-16">目前尚無待辦事項</p>
+    <div className="empty">
+      <p className="emptyText">目前尚無待辦事項</p>
       <img src={empty} alt="empty" />
     </div>
   )
@@ -51,8 +50,62 @@ const List = ({ todos, getTodoList }) => {
   // 切換待辦事項狀態
   const statusToggle = async (id) => {
     const res = await axios.patch(`${VITE_APP_HOST}/todos/${id}/toggle`)
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2000,
+      icon: "success",
+      title: "狀態已更新"
+    })
     getTodoList()
   }
+
+  // 編輯待辦事項
+
+  const [editMode, setEditMode] = useState('')
+
+  const [editContent, setEditContent] = useState('')
+
+  const editTodo = async (id) => {
+    try {
+      const res = await axios.put(`${VITE_APP_HOST}/todos/${id}`, {
+        "content": editContent
+      })
+      setEditMode('')
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        icon: "success",
+        title: "編輯成功"
+      })
+      getTodoList()
+    } catch (err) {
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        icon: "error",
+        title: "編輯失敗"
+      })
+    }
+  }
+
+  const keyDownToUpdate = (e, id) => {
+    // console.log(e.key);
+    if (e.key === 'Escape') {
+      setEditMode('')
+      getTodoList()
+    } else if (e.key === 'Enter') {
+      editTodo(id)
+    }
+    // e.key === 'Enter' ? editTodo(id) : null
+  }
+
+
 
   // 刪除待辦事項
   const deleteTodo = async (id) => {
@@ -97,9 +150,9 @@ const List = ({ todos, getTodoList }) => {
   return (
     <div className="todoList_list">
       <ul className="todoList_tab">
-        <li style={{cursor:"pointer"}}><a style={tab === '全部' ? { color: "#333333", borderBottom: "2px solid #333333"} : null} onClick={handleList}>全部</a></li>
-        <li style={{cursor:"pointer"}}><a style={tab === '待完成' ? { color: "#333333", borderBottom: "2px solid #333333"} : null} onClick={handleList}>待完成</a></li>
-        <li style={{cursor:"pointer"}}><a style={tab === '已完成' ? { color: "#333333", borderBottom: "2px solid #333333"} : null} onClick={handleList}>已完成</a></li>
+        <li style={{ cursor: "pointer" }}><a style={tab === '全部' ? { color: "#ffbf2a", borderBottom: "3px solid #ffbf2a" } : null} onClick={handleList}>全部</a></li>
+        <li style={{ cursor: "pointer" }}><a style={tab === '待完成' ? { color: "#ffbf2a", borderBottom: "3px solid #ffbf2a" } : null} onClick={handleList}>待完成</a></li>
+        <li style={{ cursor: "pointer" }}><a style={tab === '已完成' ? { color: "#ffbf2a", borderBottom: "3px solid #ffbf2a" } : null} onClick={handleList}>已完成</a></li>
       </ul>
       <div className="todoList_items">
         <ul className="todoList_item">
@@ -115,13 +168,38 @@ const List = ({ todos, getTodoList }) => {
                     checked={Boolean(item.status)}
                     onChange={() => statusToggle(item.id)}
                   />
-                  <span style={{
-                    color: item.stuats && "#9F9A91",
-                    textDecoration: item.status && "line-through"
-                  }}>{item.content}</span>
+                  {editMode === item.id ? (
+                    <div className="todoList_edit">
+                      <input type="text"
+                        className="todo-edit-input me-4"
+                        value={editContent} onChange={(e) => setEditContent(e.target.value)}
+                        onKeyDown={(e) => keyDownToUpdate(e, item.id)} />
+                      {/* <span
+                        className="material-symbols-outlined draw"
+                        onClick={(e) => editTodo(item.id)}
+                      >done</span>
+                      <span
+                        className="material-icons draw"
+                        onClick={(e) => setEditMode('')}
+                      >clear</span> */}
+                    </div>
+                  ) : (
+                    <span style={{
+                      color: item.stuats && "#9F9A91",
+                      textDecoration: item.status && "line-through"
+                    }}>{item.content}</span>
+                  )
+                  }
+
                 </label>
+                <a onClick={(e) => {
+                  setEditMode(item.id)
+                  setEditContent(item.content)
+                }}>
+                  <span className="material-symbols-outlined draw">edit_square</span>
+                </a>
                 <a onClick={(e) => deleteTodo(item.id)}>
-                  <span className="material-icons">clear</span>
+                  <span className="material-icons draw">clear</span>
                 </a>
               </li>
             )
@@ -129,7 +207,7 @@ const List = ({ todos, getTodoList }) => {
         </ul>
         <div className="todoList_statistics">
           <p> {todos.filter((item) => item.status === true).length}個已完成項目</p>
-          <a onClick={clearFinished} style={{ cursor: "pointer" }}>清除已完成項目</a>
+          <a className="clearFinished" onClick={clearFinished} style={{ cursor: "pointer" }}>清除已完成項目</a>
         </div>
       </div>
     </div>
@@ -157,7 +235,9 @@ function Todo() {
       .split("; ")
       .find((row) => row.startsWith("token="))
       ?.split("=")[1]
-    console.log(cookieValue) //token已經儲存在cookieValue變數中
+    //token已經儲存在cookieValue變數中
+    // console.log(cookieValue)
+
 
     //預設axios表頭
     axios.defaults.headers.common['Authorization'] = cookieValue
@@ -288,7 +368,7 @@ function Todo() {
                     confirmButtonText: "OK",
                   })
               }}>
-                <span className="material-icons">add</span>
+                <span className="material-icons addDraw">add</span>
               </a>
             </div>
             {todos.length ? (<List todos={todos} setTodos={setTodos} getTodoList={getTodoList} />) : (<Empty />)}

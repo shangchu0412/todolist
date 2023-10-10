@@ -185,8 +185,30 @@ img {
   padding: 87px 32px;
 }
 
-.material-icons {
+.material-icons,
+.material-symbols-outlined {
   font-size: 20px;
+}
+
+.draw:hover{
+  color: #ffbf2a;
+}
+
+
+.empty {
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  color: #3D3D3D;
+}
+
+.empty img {
+  margin-top: 20px;
+  width: 70%;
+}
+
+.todoList_statistics .clearFinished:hover {
+  color: #ffbf2a;
 }
 
 @media (max-width: 576px) {
@@ -234,7 +256,8 @@ nav {
 nav h1 a {
   width: 243px;
   height: 39px;
-  background: url(https://upload.cc/i1/2022/03/23/8vTzYG.png) no-repeat;
+  background: url(/src/assets/rhefZ3.png) no-repeat;
+  background-size: 100%;
   display: block;
   text-indent: 101%;
   overflow: hidden;
@@ -500,7 +523,7 @@ nav ul a span {
 }
 
 .inputBox a:hover {
-  background: #3b3b3b;
+  background: #ffbf2a;
 }
 
 .todoList_list {
@@ -521,6 +544,10 @@ nav ul a span {
 
 .todoList_list .todoList_tab li {
   width: 100%;
+}
+
+.todoList_list .todoList_tab li a:hover {
+  color: #ffbf2a;
 }
 
 .todoList_list .todoList_tab a {
@@ -563,6 +590,19 @@ nav ul a span {
   color: #333333;
   line-height: 20.27px;
   cursor: pointer;
+}
+
+.todoList_edit {
+  display: flex;
+  width: 100%;
+}
+
+.todoList_edit input{
+  height: 100%;
+}
+
+.todoList_edit .draw {
+  margin-left: 10px;
 }
 
 .todoList_list .todoList_items .todoList_input {
