@@ -37,6 +37,7 @@ function SingUp() {
       })
       navigate('/')
     } catch (error) {
+      console.log(error);
       Swal.fire({
         title: "註冊失敗",
         icon: 'error',
